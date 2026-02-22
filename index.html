@@ -1,0 +1,547 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Le ou La ? — Quiz de Français</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400&family=Raleway:wght@300;400;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bleu: #002395;
+    --blanc: #FFFFFF;
+    --rouge: #ED2939;
+    --bleu-light: #3a4fc7;
+    --rouge-light: #ff4d5e;
+    --shadow: 0 20px 60px rgba(0,0,0,0.25);
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    min-height: 100vh;
+    background: #0a0e2e;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: 'Raleway', sans-serif;
+    overflow: hidden;
+    position: relative;
+  }
+
+  /* Tricolor background stripes */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background: 
+      linear-gradient(135deg,
+        rgba(0,35,149,0.18) 0%,
+        transparent 40%),
+      linear-gradient(225deg,
+        rgba(237,41,57,0.18) 0%,
+        transparent 40%);
+    pointer-events: none;
+  }
+
+  /* Floating decorative circles */
+  .bg-circle {
+    position: fixed;
+    border-radius: 50%;
+    pointer-events: none;
+    opacity: 0.07;
+    animation: float 8s ease-in-out infinite;
+  }
+  .bg-circle:nth-child(1) { width: 400px; height: 400px; background: var(--bleu); top: -100px; left: -100px; animation-delay: 0s; }
+  .bg-circle:nth-child(2) { width: 300px; height: 300px; background: var(--rouge); bottom: -80px; right: -80px; animation-delay: -3s; }
+  .bg-circle:nth-child(3) { width: 200px; height: 200px; background: var(--blanc); top: 50%; left: 70%; animation-delay: -5s; }
+
+  @keyframes float {
+    0%, 100% { transform: translateY(0) scale(1); }
+    50% { transform: translateY(-20px) scale(1.03); }
+  }
+
+  .app {
+    width: 100%;
+    max-width: 520px;
+    padding: 20px;
+    position: relative;
+    z-index: 1;
+  }
+
+  /* Header */
+  .header {
+    text-align: center;
+    margin-bottom: 36px;
+  }
+
+  .flag-bar {
+    display: flex;
+    height: 5px;
+    border-radius: 3px;
+    overflow: hidden;
+    margin-bottom: 20px;
+    box-shadow: 0 2px 12px rgba(0,35,149,0.5);
+  }
+  .flag-bar div { flex: 1; }
+  .flag-bar .b { background: var(--bleu); }
+  .flag-bar .w { background: var(--blanc); }
+  .flag-bar .r { background: var(--rouge); }
+
+  .title {
+    font-family: 'Playfair Display', serif;
+    font-size: 2.6rem;
+    font-weight: 900;
+    color: var(--blanc);
+    letter-spacing: -1px;
+    text-shadow: 0 2px 20px rgba(0,35,149,0.8);
+  }
+  .title span { color: var(--rouge); font-style: italic; }
+
+  .subtitle {
+    font-size: 0.8rem;
+    letter-spacing: 0.25em;
+    text-transform: uppercase;
+    color: rgba(255,255,255,0.45);
+    margin-top: 6px;
+  }
+
+  /* Score bar */
+  .score-row {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 24px;
+    color: rgba(255,255,255,0.6);
+    font-size: 0.82rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+  }
+  .score-row strong { color: var(--blanc); font-size: 1rem; }
+
+  /* Progress bar */
+  .progress-track {
+    height: 4px;
+    background: rgba(255,255,255,0.1);
+    border-radius: 2px;
+    margin-bottom: 32px;
+    overflow: hidden;
+  }
+  .progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--bleu-light), var(--rouge));
+    border-radius: 2px;
+    transition: width 0.5s cubic-bezier(0.34,1.56,0.64,1);
+  }
+
+  /* Card */
+  .card {
+    background: rgba(255,255,255,0.05);
+    backdrop-filter: blur(20px);
+    border: 1px solid rgba(255,255,255,0.12);
+    border-radius: 24px;
+    padding: 48px 40px 40px;
+    box-shadow: var(--shadow), inset 0 1px 0 rgba(255,255,255,0.08);
+    position: relative;
+    overflow: hidden;
+  }
+
+  .card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 3px;
+    background: linear-gradient(90deg, var(--bleu), var(--blanc), var(--rouge));
+  }
+
+  .question-num {
+    font-size: 0.75rem;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: rgba(255,255,255,0.35);
+    margin-bottom: 12px;
+  }
+
+  .word-display {
+    text-align: center;
+    margin: 20px 0 12px;
+  }
+
+  .article-hint {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.1rem;
+    color: rgba(255,255,255,0.3);
+    font-style: italic;
+    margin-bottom: 4px;
+  }
+
+  .word {
+    font-family: 'Playfair Display', serif;
+    font-size: 3.2rem;
+    font-weight: 900;
+    color: var(--blanc);
+    line-height: 1;
+    transition: all 0.3s ease;
+  }
+
+  .translation {
+    font-size: 0.82rem;
+    color: rgba(255,255,255,0.35);
+    letter-spacing: 0.08em;
+    margin-top: 10px;
+  }
+
+  /* Buttons */
+  .btn-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+    margin-top: 36px;
+  }
+
+  .btn {
+    padding: 20px;
+    border: none;
+    border-radius: 16px;
+    font-family: 'Playfair Display', serif;
+    font-size: 2rem;
+    font-weight: 700;
+    font-style: italic;
+    cursor: pointer;
+    transition: all 0.2s cubic-bezier(0.34,1.56,0.64,1);
+    position: relative;
+    overflow: hidden;
+    letter-spacing: -0.5px;
+  }
+
+  .btn::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: rgba(255,255,255,0);
+    transition: background 0.2s;
+  }
+  .btn:hover::after { background: rgba(255,255,255,0.1); }
+  .btn:active { transform: scale(0.95) !important; }
+
+  .btn-le {
+    background: linear-gradient(135deg, var(--bleu), var(--bleu-light));
+    color: var(--blanc);
+    box-shadow: 0 8px 25px rgba(0,35,149,0.5);
+  }
+  .btn-le:hover { transform: translateY(-3px); box-shadow: 0 14px 30px rgba(0,35,149,0.6); }
+
+  .btn-la {
+    background: linear-gradient(135deg, var(--rouge), var(--rouge-light));
+    color: var(--blanc);
+    box-shadow: 0 8px 25px rgba(237,41,57,0.5);
+  }
+  .btn-la:hover { transform: translateY(-3px); box-shadow: 0 14px 30px rgba(237,41,57,0.6); }
+
+  .btn.correct {
+    animation: correct-flash 0.5s ease;
+  }
+  .btn.wrong {
+    animation: wrong-shake 0.4s ease;
+  }
+
+  @keyframes correct-flash {
+    0% { filter: brightness(1); }
+    30% { filter: brightness(1.6); transform: scale(1.05); }
+    100% { filter: brightness(1); transform: scale(1); }
+  }
+  @keyframes wrong-shake {
+    0%,100% { transform: translateX(0); }
+    20% { transform: translateX(-8px); }
+    40% { transform: translateX(8px); }
+    60% { transform: translateX(-5px); }
+    80% { transform: translateX(5px); }
+  }
+
+  /* Feedback overlay */
+  .feedback {
+    position: absolute;
+    inset: 0;
+    border-radius: 24px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.3s;
+    z-index: 10;
+  }
+  .feedback.show {
+    opacity: 1;
+    pointer-events: all;
+  }
+  .feedback.correct-fb { background: rgba(0,180,80,0.92); backdrop-filter: blur(8px); }
+  .feedback.wrong-fb { background: rgba(180,0,0,0.92); backdrop-filter: blur(8px); }
+
+  .feedback-icon {
+    font-size: 3.5rem;
+    animation: pop 0.3s cubic-bezier(0.34,1.56,0.64,1);
+  }
+  .feedback-text {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.5rem;
+    color: white;
+    margin-top: 8px;
+    font-weight: 700;
+  }
+  .feedback-answer {
+    color: rgba(255,255,255,0.7);
+    font-size: 0.85rem;
+    margin-top: 4px;
+    font-style: italic;
+  }
+
+  @keyframes pop {
+    0% { transform: scale(0); }
+    100% { transform: scale(1); }
+  }
+
+  /* Result screen */
+  .result {
+    display: none;
+    text-align: center;
+    padding: 20px 0;
+  }
+  .result.show { display: block; }
+  .quiz-area { display: block; }
+  .quiz-area.hide { display: none; }
+
+  .result-trophy { font-size: 4rem; margin-bottom: 16px; }
+  .result-score {
+    font-family: 'Playfair Display', serif;
+    font-size: 4.5rem;
+    font-weight: 900;
+    color: var(--blanc);
+    line-height: 1;
+  }
+  .result-label {
+    color: rgba(255,255,255,0.5);
+    font-size: 0.85rem;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    margin-top: 6px;
+  }
+  .result-msg {
+    font-family: 'Playfair Display', serif;
+    font-style: italic;
+    font-size: 1.2rem;
+    color: rgba(255,255,255,0.75);
+    margin: 20px 0 32px;
+  }
+
+  .btn-restart {
+    background: linear-gradient(135deg, var(--bleu), var(--rouge));
+    color: white;
+    border: none;
+    border-radius: 14px;
+    padding: 16px 40px;
+    font-family: 'Raleway', sans-serif;
+    font-size: 0.9rem;
+    font-weight: 600;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    cursor: pointer;
+    box-shadow: 0 8px 25px rgba(0,0,0,0.4);
+    transition: all 0.25s cubic-bezier(0.34,1.56,0.64,1);
+  }
+  .btn-restart:hover { transform: translateY(-3px) scale(1.03); }
+
+  /* Word enter animation */
+  @keyframes word-in {
+    0% { opacity: 0; transform: translateY(20px) scale(0.95); }
+    100% { opacity: 1; transform: translateY(0) scale(1); }
+  }
+  .word-display { animation: word-in 0.4s ease forwards; }
+</style>
+</head>
+<body>
+
+<div class="bg-circle"></div>
+<div class="bg-circle"></div>
+<div class="bg-circle"></div>
+
+<div class="app">
+  <div class="header">
+    <div class="flag-bar"><div class="b"></div><div class="w"></div><div class="r"></div></div>
+    <div class="title"><span>Le</span> ou <span>La</span> ?</div>
+    <div class="subtitle">Quiz de Grammaire Française</div>
+  </div>
+
+  <div class="score-row">
+    <div>問題 <strong id="q-num">1</strong> / <strong id="q-total">10</strong></div>
+    <div>正解 <strong id="score">0</strong></div>
+  </div>
+
+  <div class="progress-track">
+    <div class="progress-fill" id="progress" style="width:0%"></div>
+  </div>
+
+  <div class="card" id="card">
+    <!-- Quiz -->
+    <div class="quiz-area" id="quiz-area">
+      <div class="question-num" id="q-label">Question 1</div>
+      <div class="word-display" id="word-display">
+        <div class="article-hint">le ou la ...</div>
+        <div class="word" id="word">chat</div>
+        <div class="translation" id="translation">猫</div>
+      </div>
+      <div class="btn-row">
+        <button class="btn btn-le" id="btn-le" onclick="answer('le')">le</button>
+        <button class="btn btn-la" id="btn-la" onclick="answer('la')">la</button>
+      </div>
+    </div>
+
+    <!-- Feedback overlay -->
+    <div class="feedback" id="feedback">
+      <div class="feedback-icon" id="fb-icon">✓</div>
+      <div class="feedback-text" id="fb-text">Correct !</div>
+      <div class="feedback-answer" id="fb-answer"></div>
+    </div>
+
+    <!-- Result -->
+    <div class="result" id="result">
+      <div class="result-trophy" id="trophy">🏆</div>
+      <div class="result-score" id="final-score">8 / 10</div>
+      <div class="result-label">スコア</div>
+      <div class="result-msg" id="result-msg">Très bien !</div>
+      <button class="btn-restart" onclick="restart()">もう一度 &nbsp;▸</button>
+    </div>
+  </div>
+</div>
+
+<script>
+  const words = [
+    { word: 'chat',     article: 'le', ja: '猫' },
+    { word: 'maison',   article: 'la', ja: '家' },
+    { word: 'soleil',   article: 'le', ja: '太陽' },
+    { word: 'lune',     article: 'la', ja: '月' },
+    { word: 'livre',    article: 'le', ja: '本' },
+    { word: 'fleur',    article: 'la', ja: '花' },
+    { word: 'pain',     article: 'le', ja: 'パン' },
+    { word: 'mer',      article: 'la', ja: '海' },
+    { word: 'jardin',   article: 'le', ja: '庭' },
+    { word: 'nuit',     article: 'la', ja: '夜' },
+    { word: 'chien',    article: 'le', ja: '犬' },
+    { word: 'voiture',  article: 'la', ja: '車' },
+    { word: 'café',     article: 'le', ja: 'コーヒー' },
+    { word: 'fenêtre',  article: 'la', ja: '窓' },
+    { word: 'vent',     article: 'le', ja: '風' },
+  ];
+
+  let queue = [];
+  let current = 0;
+  let score = 0;
+  let locked = false;
+
+  function shuffle(arr) {
+    return [...arr].sort(() => Math.random() - 0.5);
+  }
+
+  function start() {
+    queue = shuffle(words).slice(0, 10);
+    current = 0;
+    score = 0;
+    locked = false;
+    document.getElementById('score').textContent = 0;
+    document.getElementById('q-total').textContent = 10;
+    document.getElementById('result').classList.remove('show');
+    document.getElementById('quiz-area').classList.remove('hide');
+    document.getElementById('btn-le').disabled = false;
+    document.getElementById('btn-la').disabled = false;
+    showQuestion();
+  }
+
+  function showQuestion() {
+    const q = queue[current];
+    document.getElementById('q-num').textContent = current + 1;
+    document.getElementById('q-label').textContent = `Question ${current + 1}`;
+    document.getElementById('word').textContent = q.word;
+    document.getElementById('translation').textContent = q.ja;
+    document.getElementById('progress').style.width = (current / 10 * 100) + '%';
+
+    // Re-trigger animation
+    const wd = document.getElementById('word-display');
+    wd.style.animation = 'none';
+    wd.offsetHeight;
+    wd.style.animation = '';
+
+    hideFeedback();
+    locked = false;
+    document.getElementById('btn-le').disabled = false;
+    document.getElementById('btn-la').disabled = false;
+  }
+
+  function answer(chosen) {
+    if (locked) return;
+    locked = true;
+
+    const q = queue[current];
+    const correct = chosen === q.article;
+
+    document.getElementById('btn-le').disabled = true;
+    document.getElementById('btn-la').disabled = true;
+
+    const fb = document.getElementById('feedback');
+    const fbIcon = document.getElementById('fb-icon');
+    const fbText = document.getElementById('fb-text');
+    const fbAnswer = document.getElementById('fb-answer');
+
+    if (correct) {
+      score++;
+      document.getElementById('score').textContent = score;
+      fb.className = 'feedback show correct-fb';
+      fbIcon.textContent = '✨';
+      fbText.textContent = 'Correct !';
+      fbAnswer.textContent = `${q.article} ${q.word} — ${q.ja}`;
+    } else {
+      fb.className = 'feedback show wrong-fb';
+      fbIcon.textContent = '✗';
+      fbText.textContent = 'Incorrect…';
+      fbAnswer.textContent = `正解は「${q.article} ${q.word}」`;
+    }
+
+    setTimeout(() => {
+      current++;
+      if (current >= 10) {
+        showResult();
+      } else {
+        showQuestion();
+      }
+    }, 1300);
+  }
+
+  function hideFeedback() {
+    document.getElementById('feedback').className = 'feedback';
+  }
+
+  function showResult() {
+    hideFeedback();
+    document.getElementById('quiz-area').classList.add('hide');
+    document.getElementById('progress').style.width = '100%';
+
+    document.getElementById('final-score').textContent = `${score} / 10`;
+
+    let msg, trophy;
+    if (score === 10)      { msg = 'Parfait ! Magnifique ! 🇫🇷'; trophy = '🏆'; }
+    else if (score >= 8)   { msg = 'Très bien ! すばらしい！'; trophy = '🥇'; }
+    else if (score >= 6)   { msg = 'Bien ! もう少し！'; trophy = '🥈'; }
+    else if (score >= 4)   { msg = 'Pas mal ! 練習あるのみ！'; trophy = '🥉'; }
+    else                   { msg = 'Continue ! まだまだこれから！'; trophy = '💪'; }
+
+    document.getElementById('result-msg').textContent = msg;
+    document.getElementById('trophy').textContent = trophy;
+    document.getElementById('result').classList.add('show');
+  }
+
+  function restart() {
+    start();
+  }
+
+  start();
+</script>
+</body>
+</html>
